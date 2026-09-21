@@ -106,4 +106,47 @@ public:
 			throw std::out_of_range("Value out of range");
 		return _matrix[row * _column + column];
 	}
+
+	MyMatrix operator+(const MyMatrix& other) const {
+		if (_row != other._row || _column != other._column)
+			throw std::invalid_argument("Error! The matrix sizes are not equal.");
+		MyMatrix result = *this;
+		for (int i = 0; i < _row * _column; ++i) result._matrix[i] += other._matrix[i];
+		return result;
+	}
+
+	MyMatrix operator-(const MyMatrix& other) const {
+		if (_row != other._row || _column != other._column)
+			throw std::invalid_argument("Error! The matrix sizes are not equal.");
+		MyMatrix result = *this;
+		for (int i = 0; i < _row * _column; ++i) result._matrix[i] -= other._matrix[i];
+		return result;
+	}
+
+	MyMatrix operator*(const MyMatrix& other) const {
+		if (_column != other._row)
+			throw std::invalid_argument("Error! Invalid matrix size!");
+		MyMatrix result(_row, other._column, T());
+		for (int i = 0; i < _row; ++i)
+			for (int j = 0; j < other._column; ++j) {
+				T sum = T();
+				for (int t = 0; t < _column; ++t)
+					sum += _matrix[i * _column + t] * other._matrix[t * other._column + j];
+				result._matrix[i * other._column + j] = sum;
+			}
+		return result;
+	}
+
+	MyMatrix operator*(const T& multiplier) const {
+		MyMatrix result = *this;
+		for (int i = 0; i < _row * _column; ++i) result._matrix[i] *= multiplier;
+		return result;
+	}
+
+	MyMatrix operator/(const T& divider) const {
+		if (divider == T()) throw std::invalid_argument("Error! Division by zero!");
+		MyMatrix result = *this;
+		for (int i = 0; i < _row * _column; ++i) result._matrix[i] /= divider;
+		return result;
+	}
 }
