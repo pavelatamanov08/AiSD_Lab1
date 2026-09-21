@@ -81,4 +81,29 @@ public:
 			_matrix[i] = other._matrix[i];
 		}
 	}
+
+	MyMatrix& operator=(const MyMatrix& other) {
+		if (this == &other) return *this;
+		delete[] _matrix;
+		_row = other._row;
+		_column = other._column;
+		_matrix = new T[_row * _column];
+		for (int i = 0; i < _row * _column; ++i) _matrix[i] = other._matrix[i];
+		return *this;
+	}
+
+	int GetRow() const { return _row; }
+	int GetColumn() const { return _column; }
+
+	T& operator()(int row, int column) {
+		if (row < 0 || row >= _row || column < 0 || column >= _column)
+			throw std::out_of_range("Value out of range");
+		return _matrix[row * _column + column];
+	}
+
+	const T& operator()(int row, int column) const {
+		if (row < 0 || row >= _row || column < 0 || column >= _column)
+			throw std::out_of_range("Value out of range");
+		return _matrix[row * _column + column];
+	}
 }
