@@ -185,16 +185,19 @@ public:
 		for (int i = 0; i < _column; ++i) Trase += _matrix[i * _column + i];
 		return Trase;
 	}
-}
+};
 
 export template<typename T>
-MyMatrix<T> operator*(const T& multiplier, const MyMatrix<T>& matrix) {
+MyMatrix<T> operator*(const T& multiplier, const MyMatrix<T>& matrix) 
+{
 	return matrix * multiplier;
 }
 
 export template<typename T>
-std::ostream& operator<<(std::ostream& os, const MyMatrix<T>& obj) {
-	for (int i = 0; i < obj.GetRow(); ++i) {
+std::ostream& operator<<(std::ostream& os, const MyMatrix<T>& obj) 
+{
+	for (int i = 0; i < obj.GetRow(); ++i) 
+	{
 		for (int j = 0; j < obj.GetColumn(); ++j)
 			os << obj(i, j) << "  ";
 		os << "\n";
