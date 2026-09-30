@@ -65,10 +65,18 @@ public:
 			}
 		}
 
-		else if constexpr (std::is_same_v<T, std::complex<float>> || std::is_same_v<T, std::complex<double>>)
+		else if constexpr (std::is_same_v<T, std::complex<float>>)
 		{
-			using U = decltype(min.real());
-			std::uniform_real_distribution<U> dist(min.real(), max.real());
+			std::uniform_real_distribution<T> dist(min.real(), max.real());
+			for (int i = 0; i < r * c; ++i)
+			{
+				_matrix[i] = T(dist(gen), dist(gen));
+			}
+		}
+
+		else if constexpr (std::is_same_v<T, std::complex<double>>)
+		{
+			std::uniform_real_distribution<T> dist(min.real(), max.real());
 			for (int i = 0; i < r * c; ++i)
 			{
 				_matrix[i] = T(dist(gen), dist(gen));
@@ -103,7 +111,7 @@ public:
 	int GetRow() const { return _row; }
 	int GetColumn() const { return _column; }
 
-	T& operator()(int row, int column) 
+	T& operator()(int row, int column)
 	{
 		if (row < 0 || row >= _row || column < 0 || column >= _column)
 			throw std::out_of_range("Value out of range");
@@ -141,12 +149,15 @@ public:
 			throw std::invalid_argument("Error! Invalid matrix size!");
 		MyMatrix result(_row, other._column, T());
 		for (int i = 0; i < _row; ++i)
-			for (int j = 0; j < other._column; ++j) {
+		{
+			for (int j = 0; j < other._column; ++j)
+			{
 				T sum = T();
 				for (int t = 0; t < _column; ++t)
 					sum += _matrix[i * _column + t] * other._matrix[t * other._column + j];
 				result._matrix[i * other._column + j] = sum;
 			}
+		}
 		return result;
 	}
 
@@ -194,7 +205,7 @@ MyMatrix<T> operator*(const T& multiplier, const MyMatrix<T>& matrix)
 }
 
 export template<typename T>
-std::ostream& operator<<(std::ostream& os, const MyMatrix<T>& obj) 
+std::ostream& operator<<(std::ostream& os, const MyMatrix<T>& obj)
 {
 	for (int i = 0; i < obj.GetRow(); ++i) 
 	{

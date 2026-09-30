@@ -49,12 +49,12 @@ MyMatrix<T> SearchVectorX(MyMatrix<T>& A, MyMatrix<T>& b)
 	MyMatrix<T> x(A.GetRow(), 1, T());
 	for (int i = A.GetRow() - 1; i >= 0; --i)
 	{
-		T sum = b(i, 0);
+		T prod = b(i, 0);
 		for (int j = i + 1; j < A.GetColumn(); ++j)
 		{
-			sum -= A(i, j) * x(j, 0);
+			prod -= A(i, j) * x(j, 0);
 		}
-		x(i, 0) = sum / A(i, i);
+		x(i, 0) = prod / A(i, i);
 	}
 	return x;
 }
