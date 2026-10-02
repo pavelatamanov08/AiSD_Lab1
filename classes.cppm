@@ -14,6 +14,40 @@ private:
 	static bool comparison(int a, int b) { return a == b; }
 	template<typename U>
 	static bool comparison(const std::complex<U>& a, const std::complex<U>& b) { return a == b; }
+
+	static void FillRandom(int* data, int size, int min, int max)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<int> dist(min, max);
+		for (int i = 0; i < size; ++i)
+		{
+			data[i] = dist(gen);
+		}
+	}
+	template<typename U>
+	static void FillRandom(U* data, int size, U min, U max)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<U> dist(min, max);
+		for (int i = 0; i < size; ++i)
+		{
+			data[i] = dist(gen);
+		}
+	}
+	template<typename U>
+	static void FillRandom(std::complex<U>* data, int size, const std::complex<U>& min, const std::complex<U>& max)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<U> dist1(min.real(), max.real());
+		std::uniform_real_distribution<U> dist2(min.imag(), max.imag());
+		for (int i = 0; i < size; ++i)
+		{
+			data[i] = std::complex<U>(dist1(gen), dist2(gen));
+		}
+	}
 public:
 	MyMatrix(int r, int c, const T& m) : _row(r), _column(c), _matrix(new T[r * c])
 	{
@@ -34,54 +68,7 @@ public:
 		{
 			throw std::invalid_argument("Error! Invalid value!");
 		}
-
-		std::random_device rd;
-		std::mt19937 gen(rd());
-
-		if constexpr (std::is_same_v<T, int>)
-		{
-			std::uniform_int_distribution<T> dist(min, max);
-			for (int i = 0; i < r * c; ++i)
-			{
-				_matrix[i] = dist(gen);
-			}
-		}
-
-		else if constexpr (std::is_same_v<T, float>)
-		{
-			std::uniform_real_distribution<T> dist(min, max);
-			for (int i = 0; i < r * c; ++i)
-			{
-				_matrix[i] = dist(gen);
-			}
-		}
-
-		else if constexpr (std::is_same_v<T, double>)
-		{
-			std::uniform_real_distribution<T> dist(min, max);
-			for (int i = 0; i < r * c; ++i)
-			{
-				_matrix[i] = dist(gen);
-			}
-		}
-
-		else if constexpr (std::is_same_v<T, std::complex<float>>)
-		{
-			std::uniform_real_distribution<T> dist(min.real(), max.real());
-			for (int i = 0; i < r * c; ++i)
-			{
-				_matrix[i] = T(dist(gen), dist(gen));
-			}
-		}
-
-		else if constexpr (std::is_same_v<T, std::complex<double>>)
-		{
-			std::uniform_real_distribution<T> dist(min.real(), max.real());
-			for (int i = 0; i < r * c; ++i)
-			{
-				_matrix[i] = T(dist(gen), dist(gen));
-			}
-		}
+		FillRandom(_matrix, r * c, min, max);
 	}
 
 	~MyMatrix()
@@ -104,7 +91,10 @@ public:
 		_row = other._row;
 		_column = other._column;
 		_matrix = new T[_row * _column];
-		for (int i = 0; i < _row * _column; ++i) _matrix[i] = other._matrix[i];
+		for (int i = 0; i < _row * _column; ++i)
+		{
+			_matrix[i] = other._matrix[i];
+		}
 		return *this;
 	}
 
@@ -114,39 +104,55 @@ public:
 	T& operator()(int row, int column)
 	{
 		if (row < 0 || row >= _row || column < 0 || column >= _column)
+		{
 			throw std::out_of_range("Value out of range");
+		}
 		return _matrix[row * _column + column];
 	}
 
 	const T& operator()(int row, int column) const 
 	{
 		if (row < 0 || row >= _row || column < 0 || column >= _column)
+		{
 			throw std::out_of_range("Value out of range");
+		}
 		return _matrix[row * _column + column];
 	}
 
 	MyMatrix operator+(const MyMatrix& other) const 
 	{
 		if (_row != other._row || _column != other._column)
+		{
 			throw std::invalid_argument("Error! The matrix sizes are not equal.");
+		}
 		MyMatrix result = *this;
-		for (int i = 0; i < _row * _column; ++i) result._matrix[i] += other._matrix[i];
+		for (int i = 0; i < _row * _column; ++i)
+		{
+			result._matrix[i] += other._matrix[i];
+		}
 		return result;
 	}
 
 	MyMatrix operator-(const MyMatrix& other) const 
 	{
 		if (_row != other._row || _column != other._column)
+		{
 			throw std::invalid_argument("Error! The matrix sizes are not equal.");
+		}
 		MyMatrix result = *this;
-		for (int i = 0; i < _row * _column; ++i) result._matrix[i] -= other._matrix[i];
+		for (int i = 0; i < _row * _column; ++i)
+		{
+			result._matrix[i] -= other._matrix[i];
+		}
 		return result;
 	}
 
 	MyMatrix operator*(const MyMatrix& other) const 
 	{
 		if (_column != other._row)
+		{
 			throw std::invalid_argument("Error! Invalid matrix size!");
+		}
 		MyMatrix result(_row, other._column, T());
 		for (int i = 0; i < _row; ++i)
 		{
@@ -154,7 +160,9 @@ public:
 			{
 				T sum = T();
 				for (int t = 0; t < _column; ++t)
+				{
 					sum += _matrix[i * _column + t] * other._matrix[t * other._column + j];
+				}
 				result._matrix[i * other._column + j] = sum;
 			}
 		}
@@ -164,15 +172,24 @@ public:
 	MyMatrix operator*(const T& multiplier) const 
 	{
 		MyMatrix result = *this;
-		for (int i = 0; i < _row * _column; ++i) result._matrix[i] *= multiplier;
+		for (int i = 0; i < _row * _column; ++i)
+		{
+			result._matrix[i] *= multiplier;
+		}
 		return result;
 	}
 
 	MyMatrix operator/(const T& divider) const 
 	{
-		if (divider == T()) throw std::invalid_argument("Error! Division by zero!");
+		if (divider == T())
+		{
+			throw std::invalid_argument("Error! Division by zero!");
+		}
 		MyMatrix result = *this;
-		for (int i = 0; i < _row * _column; ++i) result._matrix[i] /= divider;
+		for (int i = 0; i < _row * _column; ++i)
+		{
+			result._matrix[i] /= divider;
+		}
 		return result;
 	}
 
@@ -180,7 +197,9 @@ public:
 	{
 		if (_row != other._row || _column != other._column) return false;
 		for (int i = 0; i < _row * _column; ++i)
+		{
 			if (!comparison(_matrix[i], other._matrix[i])) return false;
+		}
 		return true;
 	}
 
@@ -191,9 +210,15 @@ public:
 
 	T TraseMatrix() const 
 	{
-		if (_row != _column) throw std::invalid_argument("Error! Matrix is not square.");
+		if (_row != _column)
+		{
+			throw std::invalid_argument("Error! Matrix is not square.");
+		}
 		T Trase = T();
-		for (int i = 0; i < _column; ++i) Trase += _matrix[i * _column + i];
+		for (int i = 0; i < _column; ++i)
+		{
+			Trase += _matrix[i * _column + i];
+		}
 		return Trase;
 	}
 };
@@ -210,7 +235,9 @@ std::ostream& operator<<(std::ostream& os, const MyMatrix<T>& obj)
 	for (int i = 0; i < obj.GetRow(); ++i) 
 	{
 		for (int j = 0; j < obj.GetColumn(); ++j)
+		{
 			os << obj(i, j) << "  ";
+		}
 		os << "\n";
 	}
 	os << "\n";
